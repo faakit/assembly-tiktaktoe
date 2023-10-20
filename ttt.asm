@@ -263,7 +263,7 @@ draw_cross:
 	pop		ax
 	popf
 	pop		bp
-	ret		1
+	ret     4
 clear_screen:
     mov     ah, 0
     mov     al, 3
@@ -422,6 +422,15 @@ print11:
     inc     bx			;proximo caracter
     inc		dl			;avanca a coluna
     loop    print11
+; if campo_11_status === 1 draw a cross
+    cmp byte[campo_11_status], 1
+    jne check_11
+    mov     ax, 150
+    mov     bx, 400
+    push    ax
+    push    bx
+    call draw_cross
+check_11:
 ; zone 12 string
     mov     	cx,2			;n�mero de caracteres
     mov     	bx,0
