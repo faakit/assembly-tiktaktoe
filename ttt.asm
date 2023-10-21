@@ -211,7 +211,7 @@ fim_circle:
 	pop		ax
 	popf
 	pop		bp
-	ret		6
+	ret		4
 
     ; função para desenhar um X
     ;  push x; push y; call draw_cross;
@@ -424,13 +424,19 @@ print11:
     loop    print11
 ; if campo_11_status === 1 draw a cross
     cmp byte[campo_11_status], 1
-    jne check_11
-    mov     ax, 150
     mov     bx, 400
+    mov     ax, 150
+    jne check_11
     push    ax
     push    bx
     call draw_cross
 check_11:
+		cmp byte[campo_11_status], 2
+		jne jump_11
+		push 		ax
+		push 		bx
+		call draw_circle
+jump_11:
 ; zone 12 string
     mov     	cx,2			;n�mero de caracteres
     mov     	bx,0
@@ -443,6 +449,21 @@ print12:
     inc     bx			;proximo caracter
     inc		dl			;avanca a coluna
     loop    print12
+; if campo_12_status === 1 draw a cross, if === 2, draw a circle
+    cmp byte[campo_12_status], 1
+    mov     bx, 400
+    mov     ax, 320
+    jne check_12
+    push    ax
+    push    bx
+    call draw_cross
+check_12:
+		cmp byte[campo_12_status], 2
+		jne jump_12
+		push 		ax
+		push 		bx
+		call draw_circle
+jump_12:
 ; zone 13 string
     mov     	cx,2			;n�mero de caracteres
     mov     	bx,0
@@ -455,6 +476,21 @@ print13:
     inc     bx			;proximo caracter
     inc		dl			;avanca a coluna
     loop    print13
+; if campo_13_status === 1 draw a cross, if === 2, draw a circle
+    cmp byte[campo_13_status], 1
+    mov     bx, 400
+    mov     ax, 500
+    jne check_13
+    push    ax
+    push    bx
+    call draw_cross
+check_13:
+		cmp byte[campo_13_status], 2
+		jne jump_13
+		push 		ax
+		push 		bx
+		call draw_circle
+jump_13:
 ; zone 21 string
     mov     	cx,2			;n�mero de caracteres
     mov     	bx,0
@@ -467,6 +503,21 @@ print21:
     inc     bx			;proximo caracter
     inc		dl			;avanca a coluna
     loop    print21
+; if campo_21_status === 1 draw a cross, if === 2, draw a circle
+    cmp byte[campo_21_status], 1
+    mov     bx, 310
+    mov     ax, 150
+    jne check_21
+    push    ax
+    push    bx
+    call draw_cross
+check_21:
+		cmp byte[campo_21_status], 2
+		jne jump_21
+		push 		ax
+		push 		bx
+		call draw_circle
+jump_21:
 ; zone 22 string
     mov     	cx,2			;n�mero de caracteres
     mov     	bx,0
@@ -479,6 +530,21 @@ print22:
     inc     bx			;proximo caracter
     inc		dl			;avanca a coluna
     loop    print22
+; if campo_22_status === 1 draw a cross, if === 2, draw a circle
+    cmp byte[campo_22_status], 1
+    mov     bx, 310
+    mov     ax, 320
+    jne check_22
+    push    ax
+    push    bx
+    call draw_cross
+check_22:
+		cmp byte[campo_22_status], 2
+		jne jump_22
+		push 		ax
+		push 		bx
+		call draw_circle
+jump_22:
 ; zone 23 string
     mov     	cx,2			;n�mero de caracteres
     mov     	bx,0
@@ -491,6 +557,21 @@ print23:
     inc     bx			;proximo caracter
     inc		dl			;avanca a coluna
     loop    print23
+; if campo_23_status === 1 draw a cross, if === 2, draw a circle
+    cmp byte[campo_23_status], 1
+    mov     bx, 310
+    mov     ax, 500
+    jne check_23
+    push    ax
+    push    bx
+    call draw_cross
+check_23:
+		cmp byte[campo_23_status], 2
+		jne jump_23
+		push 		ax
+		push 		bx
+		call draw_circle
+jump_23:
 ; zone 31 string
     mov     	cx,2			;n�mero de caracteres
     mov     	bx,0
@@ -503,7 +584,22 @@ print31:
     inc     bx			;proximo caracter
     inc		dl			;avanca a coluna
     loop    print31
-; zone 22 string
+; if campo_31_status === 1 draw a cross, if === 2, draw a circle
+    cmp byte[campo_31_status], 1
+    mov     bx, 220
+    mov     ax, 150
+    jne check_31
+    push    ax
+    push    bx
+    call draw_cross
+check_31:
+		cmp byte[campo_31_status], 2
+		jne jump_31
+		push 		ax
+		push 		bx
+		call draw_circle
+jump_31:
+; zone 32 string
     mov     	cx,2			;n�mero de caracteres
     mov     	bx,0
     mov     	dh,14			;linha 0-29
@@ -515,6 +611,21 @@ print32:
     inc     bx			;proximo caracter
     inc		dl			;avanca a coluna
     loop    print32
+; if campo_32_status === 1 draw a cross, if === 2, draw a circle
+    cmp byte[campo_32_status], 1
+    mov     bx, 220
+    mov     ax, 320
+    jne check_32
+    push    ax
+    push    bx
+    call draw_cross
+check_32:
+		cmp byte[campo_32_status], 2
+		jne jump_32
+		push 		ax
+		push 		bx
+		call draw_circle
+jump_32:
 ; zone 33 string
     mov     	cx,2			;n�mero de caracteres
     mov     	bx,0
@@ -527,6 +638,21 @@ print33:
     inc     bx			;proximo caracter
     inc		dl			;avanca a coluna
     loop    print33
+; if campo_33_status === 1 draw a cross, if === 2, draw a circle
+    cmp byte[campo_33_status], 1
+    mov     bx, 220
+    mov     ax, 500
+    jne check_33
+    push    ax
+    push    bx
+    call draw_cross
+check_33:
+		cmp byte[campo_33_status], 2
+		jne jump_33
+		push 		ax
+		push 		bx
+		call draw_circle
+jump_33:
 
     ret     0
 ; **********************************************************
@@ -820,13 +946,13 @@ buffer          db          '   '
 ; 0 : nada. 1 : X. 2 : O
 campo_11_status db 1
 campo_12_status db 2
-campo_13_status db 0
-campo_21_status db 0
-campo_22_status db 0
-campo_23_status db 0
-campo_31_status db 0
-campo_32_status db 0
-campo_33_status db 0
+campo_13_status db 1
+campo_21_status db 2
+campo_22_status db 1
+campo_23_status db 2
+campo_31_status db 1
+campo_32_status db 2
+campo_33_status db 1
 ;*************************************************************************
 segment stack stack
     		resb 		512
