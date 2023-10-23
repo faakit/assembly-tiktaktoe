@@ -17,7 +17,7 @@ segment code:
     int     	10h
 
     call        blank_screen
-	call		get_three_chars
+	call		player_input
 
 
 ; aguarda tecla e retorna
@@ -30,7 +30,7 @@ segment code:
 	int     21h
 
 
-get_three_chars:
+player_input:
     push    ax
     push    bx
     push    cx
@@ -38,36 +38,86 @@ get_three_chars:
     
     
     ; Read the first character
+read_buffer1:
 	mov byte[cor], azul_claro
     mov     dh, 27
     mov     dl, 30
 	call cursor
     mov     ah, 7
     int     21h
+	cmp		al, 'X'
+	je 		continue_buffer1
+	cmp		al, 'C'
+	je 		continue_buffer1
+	jmp 	read_buffer1
+continue_buffer1:
     mov     byte[buffer], al
     call    caracter
 	inc dl
     
     ; Read the second character
     call cursor
+read_buffer2:
 	mov     ah, 7
     int     21h
+	cmp		al, kb_backspace
+	jne 	after_buffer2_backspace
+	sub 	dl, 1
+	mov		byte[buffer], ' '
+	call	cursor
+	call 	caracter
+	jmp 	read_buffer1
+after_buffer2_backspace:
+	sub     al, '0'          ; convert from ASCII to binary
+    cmp     al, 1
+    jb      read_buffer2
+    cmp     al, 3
+    ja      read_buffer2
+	add 	al, '0'
     mov     byte[buffer+1], al
     call    caracter
     inc dl
 
     ; Read the third character
 	call cursor
+read_buffer3:
     mov     ah, 7
     int     21h
+	cmp		al, kb_backspace
+	jne 	after_buffer3_backspace
+	sub 	dl, 1
+	mov		byte[buffer+1], ' '
+	call	cursor
+	call 	caracter
+	jmp 	read_buffer2
+after_buffer3_backspace:
+	sub     al, '0'          ; convert from ASCII to binary
+    cmp     al, 1
+    jb      read_buffer3
+    cmp     al, 3
+    ja      read_buffer3
+	add 	al, '0'
     mov     byte[buffer+2], al
     call    caracter
+buffer_end:
+    mov     ah, 7
+    int     21h
+	cmp		al, kb_backspace
+	jne 	after_buffer_end_backspace
+	mov		byte[buffer+2], ' '
+	call	cursor
+	call 	caracter
+	jmp 	read_buffer3
+after_buffer_end_backspace:
+	cmp     al, kb_enter
+	jne     buffer_end
     
     pop     dx
     pop     cx
     pop     bx
     pop     ax
     ret
+
 
 ;_____________________________________________________________________________
 ;    fun��o circle
@@ -943,6 +993,8 @@ campo_31    	db  		'31'
 campo_32    	db  		'32'
 campo_33    	db  		'33'
 buffer          db          '   '
+kb_backspace 			equ		8
+kb_enter	 			equ		13
 ; 0 : nada. 1 : X. 2 : O
 campo_11_status db 1
 campo_12_status db 2
