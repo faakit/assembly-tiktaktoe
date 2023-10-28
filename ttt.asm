@@ -18,15 +18,15 @@ segment code:
 
 ; loop principal do jogo
 loop_principal:
-    call        blank_screen
-	call		player_input
-	call 		read_play
-	call 		change_player
-	call        clear_screen
+    call        imprime_tela
+	call		entrar_jogada
+	call 		ler_jogada
+	call 		alterar_jogador
+	call        limpar_tela
 	jmp			loop_principal
 
 ; inicia a sequencia de fechamento do jogo
-quit:
+sair:
 	mov  	ah,0   			; set video mode
 	mov  	al,[modo_anterior]   	; modo anterior
 	int  	10h
@@ -34,16 +34,16 @@ quit:
 	int     21h
 
 ; realiza a leitura da jogada armazenada no buffer
-read_play:
+ler_jogada:
 	push    ax
     push    bx
     push    cx
     push    di
 
 	cmp		byte [buffer], 's'
-	je 		quit
+	je 		sair
 	cmp		byte [buffer], 'r'
-	jne     make_play
+	jne     fazer_jogada
 	; limpa as posições do jogo da velha (opcao de reset)
 	mov cx, 9
 limpa_status_campos:
@@ -57,7 +57,7 @@ limpa_status_campos:
 	pop 	bx
 	pop 	ax
 	ret
-make_play:	
+fazer_jogada:	
 	mov     al, [buffer+1]
 	sub		al, '0'
 	sub 	al, 1
@@ -71,12 +71,12 @@ make_play:
 	movzx   bx, bl
 	add		di, bx
 	cmp     byte [buffer], 'x'
-	je      read_play_x
+	je      ler_jogada_x
 	mov		byte [campo_status+di], 2
 	mov     cx, 3
 	mov     di, 0
 	jmp     limpa_buffer
-read_play_x:
+ler_jogada_x:
 	mov     byte [campo_status+di], 1
 	; clean buffer
 	mov     cx, 3
@@ -92,12 +92,12 @@ limpa_buffer:
 	ret
 
 ; altera o jogador atual (usado ao final de cada rodada)
-change_player:
+alterar_jogador:
 	cmp		byte [jogador_atual], 1
-	je 		change_player_o
+	je 		alterar_jogador_o
 	mov		byte [jogador_atual], 1
 	ret
-change_player_o:
+alterar_jogador_o:
 	mov		byte [jogador_atual], 2
 	ret
 
@@ -200,14 +200,14 @@ termina_verifica_vencedores:
 	ret
 
 ; le os comandos do jogador e armazena no buffer
-player_input:
+entrar_jogada:
     push    ax
     push    bx
     push    cx
     push    dx
     
-    ; Read the first character
-read_buffer1:
+    ; ler o primeiro caractere
+ler_buffer1:
 	mov byte[cor], azul_claro
     mov     dh, 27
     mov     dl, 30
@@ -219,25 +219,25 @@ read_buffer1:
 	cmp		al, 'c'
 	je 		continue_buffer1
 	cmp		al, 's'
-	je 		quit_or_reset
+	je 		sair_or_reset
 	cmp		al, 'r'
-	je 		quit_or_reset
-	jmp 	read_buffer1
-quit_or_reset:
+	je 		sair_or_reset
+	jmp 	ler_buffer1
+sair_or_reset:
 	mov     byte[buffer], al
     call    caracter
-quit_or_reset_after_print:
+sair_or_reset_after_print:
 	mov     ah, 7
     int     21h
 	cmp		al, kb_backspace
-	jne 	after_quit_or_reset_backspace
+	jne 	after_sair_or_reset_backspace
 	mov		byte[buffer], ' '
 	call	cursor
 	call 	caracter
-	jmp 	read_buffer1
-after_quit_or_reset_backspace:
+	jmp 	ler_buffer1
+after_sair_or_reset_backspace:
 	cmp		al, kb_enter
-	jne 	quit_or_reset_after_print
+	jne 	sair_or_reset_after_print
 
 	pop     dx
     pop     cx
@@ -249,9 +249,9 @@ continue_buffer1:
     call    caracter
 	inc dl
     
-    ; Read the second character
+    ; ler o segundo caractere
     call cursor
-read_buffer2:
+ler_buffer2:
 	mov     ah, 7
     int     21h
 	cmp		al, kb_backspace
@@ -260,21 +260,21 @@ read_buffer2:
 	mov		byte[buffer], ' '
 	call	cursor
 	call 	caracter
-	jmp 	read_buffer1
+	jmp 	ler_buffer1
 after_buffer2_backspace:
 	sub     al, '0'          ; convert from ASCII to binary
     cmp     al, 1
-    jb      read_buffer2
+    jb      ler_buffer2
     cmp     al, 3
-    ja      read_buffer2
+    ja      ler_buffer2
 	add 	al, '0'
     mov     byte[buffer+1], al
     call    caracter
     inc dl
 
-    ; Read the third character
+    ; ler the third character
 	call cursor
-read_buffer3:
+ler_buffer3:
     mov     ah, 7
     int     21h
 	cmp		al, kb_backspace
@@ -283,13 +283,13 @@ read_buffer3:
 	mov		byte[buffer+1], ' '
 	call	cursor
 	call 	caracter
-	jmp 	read_buffer2
+	jmp 	ler_buffer2
 after_buffer3_backspace:
 	sub     al, '0'          ; convert from ASCII to binary
     cmp     al, 1
-    jb      read_buffer3
+    jb      ler_buffer3
     cmp     al, 3
-    ja      read_buffer3
+    ja      ler_buffer3
 	add 	al, '0'
     mov     byte[buffer+2], al
     call    caracter
@@ -301,7 +301,7 @@ buffer_end:
 	mov		byte[buffer+2], ' '
 	call	cursor
 	call 	caracter
-	jmp 	read_buffer3
+	jmp 	ler_buffer3
 after_buffer_end_backspace:
 	cmp     al, kb_enter
 	jne     buffer_end
@@ -508,13 +508,13 @@ draw_cross:
 	popf
 	pop		bp
 	ret     4
-clear_screen:
+limpar_tela:
     mov     	al,12h
    	mov     	ah,0
     int     	10h
     ret
 
-blank_screen:
+imprime_tela:
 ; left tik tak toe bar
     mov		byte[cor],branco_intenso
 	mov		ax,232
