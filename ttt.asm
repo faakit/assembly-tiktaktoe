@@ -18,6 +18,7 @@ segment code:
 loop_principal:
     call        blank_screen
 	call		player_input
+	call 		read_play
 	call        clear_screen
 	jmp			loop_principal
 
@@ -30,12 +31,32 @@ quit:
 
 read_play:
 	mov     al, [buffer+1]
-	sub     al, 1
-	mov 	ah, 3
-	mul     ah
-	movzx   ax, al      ; Zero-extend the value in al to 16 bits
-	mov     di, ax 
-	add		di, [buffer+2]
+	sub		al, '0'
+	sub 	al, 1
+	mov		bx, 3
+	mul		bx
+	movzx   ax, al
+	mov     di, ax
+	mov	    bl, [buffer+2]
+	sub		bl, '0'
+	sub 	bl, 1
+	movzx   bx, bl
+	add		di, bx
+	cmp     byte [buffer], 'x'
+	je      read_play_x
+	mov		byte [campo_status+di], 2
+	mov     cx, 3
+	mov     di, 0
+	jmp     limpa_buffer
+read_play_x:
+	mov     byte [campo_status+di], 1
+	; clean buffer
+	mov     cx, 3
+	mov     di, 0
+limpa_buffer:
+	mov byte[buffer+di], ' '
+	loop limpa_buffer
+	ret
 
 
 player_input:
@@ -43,7 +64,6 @@ player_input:
     push    bx
     push    cx
     push    dx
-    
     
     ; Read the first character
 read_buffer1:
@@ -79,9 +99,10 @@ after_quit_or_reset_backspace:
 	cmp		al, kb_enter
 	jne 	quit_or_reset
 	cmp		byte[buffer], 'r'
-	jne 	quit
+	je 	 	reset_game
+	jmp 	quit
+reset_game:
 	; clean all 9 positions of campo_status
-	call 	clear_screen
 	mov cx, 9
 limpa_status_campos:
 	mov di, 0
@@ -94,7 +115,7 @@ limpa_status_campos:
     pop     cx
     pop     bx
     pop     ax
-	ret
+	jmp 	loop_principal
 
 
 continue_buffer1:
@@ -1044,7 +1065,7 @@ kb_backspace 			equ		8
 kb_enter	 			equ		13
 ; 0 : nada. 1 : X. 2 : O
 ; inicializa matriz 3x3 com 0
-campo_status TIMES 9 db 2
+campo_status TIMES 9 db 0
 ;*************************************************************************
 segment stack stack
     		resb 		512
