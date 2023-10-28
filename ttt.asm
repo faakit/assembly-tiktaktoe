@@ -58,19 +58,19 @@ read_buffer1:
 	cmp		al, 'c'
 	je 		continue_buffer1
 	cmp		al, 's'
+	mov     byte[buffer], al
+    call    caracter
 	je 		quit_or_reset
 	cmp		al, 'r'
+	mov     byte[buffer], al
+    call    caracter
 	je 		quit_or_reset
 	jmp 	read_buffer1
 quit_or_reset:
-	mov     byte[buffer], al
-    call    caracter
-	inc dl
 	mov     ah, 7
     int     21h
 	cmp		al, kb_backspace
 	jne 	after_quit_or_reset_backspace
-	sub 	dl, 1
 	mov		byte[buffer], ' '
 	call	cursor
 	call 	caracter
@@ -89,7 +89,7 @@ limpa_status_campos:
 	sub di, 1
 	mov byte[campo_status+di], 0
 	loop limpa_status_campos
-	
+
 	pop     dx
     pop     cx
     pop     bx
