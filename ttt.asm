@@ -30,6 +30,20 @@ quit:
 	int     21h
 
 read_play:
+	cmp		byte [buffer], 's'
+	je 		quit
+	cmp		byte [buffer], 'r'
+	jne     make_play
+	; clean all 9 positions of campo_status
+	mov cx, 9
+limpa_status_campos:
+	mov di, 0
+	add di, cx
+	sub di, 1
+	mov byte[campo_status+di], 0
+	loop limpa_status_campos
+	ret
+make_play:	
 	mov     al, [buffer+1]
 	sub		al, '0'
 	sub 	al, 1
@@ -98,24 +112,12 @@ quit_or_reset:
 after_quit_or_reset_backspace:
 	cmp		al, kb_enter
 	jne 	quit_or_reset
-	cmp		byte[buffer], 'r'
-	je 	 	reset_game
-	jmp 	quit
-reset_game:
-	; clean all 9 positions of campo_status
-	mov cx, 9
-limpa_status_campos:
-	mov di, 0
-	add di, cx
-	sub di, 1
-	mov byte[campo_status+di], 0
-	loop limpa_status_campos
 
 	pop     dx
     pop     cx
     pop     bx
     pop     ax
-	jmp 	loop_principal
+	ret
 
 
 continue_buffer1:
