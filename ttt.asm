@@ -15,19 +15,27 @@ segment code:
     mov     	al,12h
    	mov     	ah,0
     int     	10h
-
+loop_principal:
     call        blank_screen
 	call		player_input
+	call        clear_screen
+	jmp			loop_principal
 
-
-; aguarda tecla e retorna
-    mov    	ah,08h
-	int     21h
+quit:
 	mov  	ah,0   			; set video mode
 	mov  	al,[modo_anterior]   	; modo anterior
 	int  	10h
 	mov     ax,4c00h
 	int     21h
+
+read_play:
+	mov     al, [buffer+1]
+	sub     al, 1
+	mov 	ah, 3
+	mul     ah
+	movzx   ax, al      ; Zero-extend the value in al to 16 bits
+	mov     di, ax 
+	add		di, [buffer+2]
 
 
 player_input:
@@ -45,11 +53,50 @@ read_buffer1:
 	call cursor
     mov     ah, 7
     int     21h
-	cmp		al, 'X'
+	cmp		al, 'x'
 	je 		continue_buffer1
-	cmp		al, 'C'
+	cmp		al, 'c'
 	je 		continue_buffer1
+	cmp		al, 's'
+	je 		quit_or_reset
+	cmp		al, 'r'
+	je 		quit_or_reset
 	jmp 	read_buffer1
+quit_or_reset:
+	mov     byte[buffer], al
+    call    caracter
+	inc dl
+	mov     ah, 7
+    int     21h
+	cmp		al, kb_backspace
+	jne 	after_quit_or_reset_backspace
+	sub 	dl, 1
+	mov		byte[buffer], ' '
+	call	cursor
+	call 	caracter
+	jmp 	read_buffer1
+after_quit_or_reset_backspace:
+	cmp		al, kb_enter
+	jne 	quit_or_reset
+	cmp		byte[buffer], 'r'
+	jne 	quit
+	; clean all 9 positions of campo_status
+	call 	clear_screen
+	mov cx, 9
+limpa_status_campos:
+	mov di, 0
+	add di, cx
+	sub di, 1
+	mov byte[campo_status+di], 0
+	loop limpa_status_campos
+	
+	pop     dx
+    pop     cx
+    pop     bx
+    pop     ax
+	ret
+
+
 continue_buffer1:
     mov     byte[buffer], al
     call    caracter
@@ -315,9 +362,9 @@ draw_cross:
 	pop		bp
 	ret     4
 clear_screen:
-    mov     ah, 0
-    mov     al, 3
-    int     10h
+    mov     	al,12h
+   	mov     	ah,0
+    int     	10h
     ret
 
 blank_screen:
@@ -473,7 +520,7 @@ print11:
     inc		dl			;avanca a coluna
     loop    print11
 ; if campo_11_status === 1 draw a cross
-    cmp byte[campo_11_status], 1
+    cmp byte [campo_status], 1
     mov     bx, 400
     mov     ax, 150
     jne check_11
@@ -481,7 +528,7 @@ print11:
     push    bx
     call draw_cross
 check_11:
-		cmp byte[campo_11_status], 2
+		cmp byte [campo_status], 2
 		jne jump_11
 		push 		ax
 		push 		bx
@@ -500,7 +547,7 @@ print12:
     inc		dl			;avanca a coluna
     loop    print12
 ; if campo_12_status === 1 draw a cross, if === 2, draw a circle
-    cmp byte[campo_12_status], 1
+    cmp byte [campo_status+1], 1
     mov     bx, 400
     mov     ax, 320
     jne check_12
@@ -508,7 +555,7 @@ print12:
     push    bx
     call draw_cross
 check_12:
-		cmp byte[campo_12_status], 2
+		cmp byte [campo_status+1], 2
 		jne jump_12
 		push 		ax
 		push 		bx
@@ -527,7 +574,7 @@ print13:
     inc		dl			;avanca a coluna
     loop    print13
 ; if campo_13_status === 1 draw a cross, if === 2, draw a circle
-    cmp byte[campo_13_status], 1
+    cmp byte [campo_status+2], 1
     mov     bx, 400
     mov     ax, 500
     jne check_13
@@ -535,7 +582,7 @@ print13:
     push    bx
     call draw_cross
 check_13:
-		cmp byte[campo_13_status], 2
+		cmp byte [campo_status+2], 2
 		jne jump_13
 		push 		ax
 		push 		bx
@@ -554,7 +601,7 @@ print21:
     inc		dl			;avanca a coluna
     loop    print21
 ; if campo_21_status === 1 draw a cross, if === 2, draw a circle
-    cmp byte[campo_21_status], 1
+    cmp byte [campo_status+3], 1
     mov     bx, 310
     mov     ax, 150
     jne check_21
@@ -562,7 +609,7 @@ print21:
     push    bx
     call draw_cross
 check_21:
-		cmp byte[campo_21_status], 2
+		cmp byte [campo_status+3], 2
 		jne jump_21
 		push 		ax
 		push 		bx
@@ -581,7 +628,7 @@ print22:
     inc		dl			;avanca a coluna
     loop    print22
 ; if campo_22_status === 1 draw a cross, if === 2, draw a circle
-    cmp byte[campo_22_status], 1
+    cmp byte [campo_status+4], 1
     mov     bx, 310
     mov     ax, 320
     jne check_22
@@ -589,7 +636,7 @@ print22:
     push    bx
     call draw_cross
 check_22:
-		cmp byte[campo_22_status], 2
+		cmp byte [campo_status+4], 2
 		jne jump_22
 		push 		ax
 		push 		bx
@@ -608,7 +655,7 @@ print23:
     inc		dl			;avanca a coluna
     loop    print23
 ; if campo_23_status === 1 draw a cross, if === 2, draw a circle
-    cmp byte[campo_23_status], 1
+    cmp byte [campo_status+5], 1
     mov     bx, 310
     mov     ax, 500
     jne check_23
@@ -616,7 +663,7 @@ print23:
     push    bx
     call draw_cross
 check_23:
-		cmp byte[campo_23_status], 2
+		cmp byte [campo_status+5], 2
 		jne jump_23
 		push 		ax
 		push 		bx
@@ -635,7 +682,7 @@ print31:
     inc		dl			;avanca a coluna
     loop    print31
 ; if campo_31_status === 1 draw a cross, if === 2, draw a circle
-    cmp byte[campo_31_status], 1
+    cmp byte [campo_status+6], 1
     mov     bx, 220
     mov     ax, 150
     jne check_31
@@ -643,7 +690,7 @@ print31:
     push    bx
     call draw_cross
 check_31:
-		cmp byte[campo_31_status], 2
+		cmp byte [campo_status+6], 2
 		jne jump_31
 		push 		ax
 		push 		bx
@@ -662,7 +709,7 @@ print32:
     inc		dl			;avanca a coluna
     loop    print32
 ; if campo_32_status === 1 draw a cross, if === 2, draw a circle
-    cmp byte[campo_32_status], 1
+    cmp byte [campo_status+7], 1
     mov     bx, 220
     mov     ax, 320
     jne check_32
@@ -670,7 +717,7 @@ print32:
     push    bx
     call draw_cross
 check_32:
-		cmp byte[campo_32_status], 2
+		cmp byte [campo_status+7], 2
 		jne jump_32
 		push 		ax
 		push 		bx
@@ -689,7 +736,7 @@ print33:
     inc		dl			;avanca a coluna
     loop    print33
 ; if campo_33_status === 1 draw a cross, if === 2, draw a circle
-    cmp byte[campo_33_status], 1
+    cmp byte [campo_status+8], 1
     mov     bx, 220
     mov     ax, 500
     jne check_33
@@ -697,7 +744,7 @@ print33:
     push    bx
     call draw_cross
 check_33:
-		cmp byte[campo_33_status], 2
+		cmp byte [campo_status+8], 2
 		jne jump_33
 		push 		ax
 		push 		bx
@@ -996,15 +1043,8 @@ buffer          db          '   '
 kb_backspace 			equ		8
 kb_enter	 			equ		13
 ; 0 : nada. 1 : X. 2 : O
-campo_11_status db 1
-campo_12_status db 2
-campo_13_status db 1
-campo_21_status db 2
-campo_22_status db 1
-campo_23_status db 2
-campo_31_status db 1
-campo_32_status db 2
-campo_33_status db 1
+; inicializa matriz 3x3 com 0
+campo_status TIMES 9 db 2
 ;*************************************************************************
 segment stack stack
     		resb 		512
