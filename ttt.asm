@@ -15,13 +15,17 @@ segment code:
     mov     	al,12h
    	mov     	ah,0
     int     	10h
+
+; loop principal do jogo
 loop_principal:
     call        blank_screen
 	call		player_input
 	call 		read_play
+	call 		change_player
 	call        clear_screen
 	jmp			loop_principal
 
+; inicia a sequencia de fechamento do jogo
 quit:
 	mov  	ah,0   			; set video mode
 	mov  	al,[modo_anterior]   	; modo anterior
@@ -29,12 +33,18 @@ quit:
 	mov     ax,4c00h
 	int     21h
 
+; realiza a leitura da jogada armazenada no buffer
 read_play:
+	push    ax
+    push    bx
+    push    cx
+    push    di
+
 	cmp		byte [buffer], 's'
 	je 		quit
 	cmp		byte [buffer], 'r'
 	jne     make_play
-	; clean all 9 positions of campo_status
+	; limpa as posições do jogo da velha (opcao de reset)
 	mov cx, 9
 limpa_status_campos:
 	mov di, 0
@@ -42,6 +52,11 @@ limpa_status_campos:
 	sub di, 1
 	mov byte[campo_status+di], 0
 	loop limpa_status_campos
+
+	pop 	di
+	pop 	cx
+	pop 	bx
+	pop 	ax
 	ret
 make_play:	
 	mov     al, [buffer+1]
@@ -70,9 +85,24 @@ read_play_x:
 limpa_buffer:
 	mov byte[buffer+di], ' '
 	loop limpa_buffer
+
+	pop 	di
+	pop 	cx
+	pop 	bx
+	pop 	ax
 	ret
 
+; altera o jogador atual (usado ao final de cada rodada)
+change_player:
+	cmp		byte [jogador_atual], 1
+	je 		change_player_o
+	mov		byte [jogador_atual], 1
+	ret
+change_player_o:
+	mov		byte [jogador_atual], 2
+	ret
 
+; le os comandos do jogador e armazena no buffer
 player_input:
     push    ax
     push    bx
@@ -92,15 +122,14 @@ read_buffer1:
 	cmp		al, 'c'
 	je 		continue_buffer1
 	cmp		al, 's'
-	mov     byte[buffer], al
-    call    caracter
 	je 		quit_or_reset
 	cmp		al, 'r'
-	mov     byte[buffer], al
-    call    caracter
 	je 		quit_or_reset
 	jmp 	read_buffer1
 quit_or_reset:
+	mov     byte[buffer], al
+    call    caracter
+quit_or_reset_after_print:
 	mov     ah, 7
     int     21h
 	cmp		al, kb_backspace
@@ -111,15 +140,13 @@ quit_or_reset:
 	jmp 	read_buffer1
 after_quit_or_reset_backspace:
 	cmp		al, kb_enter
-	jne 	quit_or_reset
+	jne 	quit_or_reset_after_print
 
 	pop     dx
     pop     cx
     pop     bx
     pop     ax
 	ret
-
-
 continue_buffer1:
     mov     byte[buffer], al
     call    caracter
@@ -1045,7 +1072,6 @@ rosa		equ		12
 magenta_claro	equ		13
 amarelo		equ		14
 branco_intenso	equ		15
-
 modo_anterior	db		0
 linha   	dw  		0
 coluna  	dw  		0
@@ -1068,6 +1094,8 @@ kb_enter	 			equ		13
 ; 0 : nada. 1 : X. 2 : O
 ; inicializa matriz 3x3 com 0
 campo_status TIMES 9 db 0
+; qual jogador está jogando
+jogador_atual db 1
 ;*************************************************************************
 segment stack stack
     		resb 		512
