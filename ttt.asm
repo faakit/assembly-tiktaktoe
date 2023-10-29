@@ -18,8 +18,8 @@ segment code:
 
 ; loop principal do jogo -----------------
 loop_principal:
-	call 		verifica_vencedores
 	call        limpar_tela
+	call 		verifica_vencedores
     call        imprime_tela
 	mov  byte	[jogada_invalida], 0
 	call		entrar_jogada
@@ -139,6 +139,16 @@ verifica_vencedor_do_11_horizontal:
 	cmp		byte [campo_status+2], al
 	jne 	verifica_vencedor_do_11_diagonal
 	mov     byte [jogador_vencedor], al
+	mov     byte [cor], azul_claro
+	mov 	dx, 100
+	push    dx
+	mov 	dx, 400
+	push    dx
+	mov     dx, 550
+	push    dx
+	mov 	dx, 400
+	push    dx
+	call 	line
 	jmp 	termina_verifica_vencedores
 verifica_vencedor_do_12_vertical:
 	cmp 	byte [campo_status+1], al
@@ -148,6 +158,16 @@ verifica_vencedor_do_12_vertical:
 	cmp		byte [campo_status+7], al
 	jne 	verifica_vencedor_do_13_vertical
 	mov     byte [jogador_vencedor], al
+	mov     byte [cor], azul_claro
+	mov 	dx, 320
+	push    dx
+	mov 	dx, 180
+	push    dx
+	mov     dx, 320
+	push    dx
+	mov 	dx, 450
+	push    dx
+	call 	line
 	jmp 	termina_verifica_vencedores
 verifica_vencedor_do_13_vertical:
 	cmp 	byte [campo_status+2], al
@@ -157,6 +177,16 @@ verifica_vencedor_do_13_vertical:
 	cmp		byte [campo_status+8], al
 	jne 	verifica_vencedor_do_11_diagonal
 	mov     byte [jogador_vencedor], al
+	mov     byte [cor], azul_claro
+	mov 	dx, 500
+	push    dx
+	mov 	dx, 180
+	push    dx
+	mov     dx, 500
+	push    dx
+	mov 	dx, 450
+	push    dx
+	call 	line
 	jmp 	termina_verifica_vencedores
 verifica_vencedor_do_11_diagonal:
 	cmp 	byte [campo_status], al
@@ -166,6 +196,16 @@ verifica_vencedor_do_11_diagonal:
 	cmp 	byte [campo_status+8], al
 	jne 	verifica_vencedor_do_11_vertical
 	mov     byte [jogador_vencedor], al
+	mov     byte [cor], azul_claro
+	mov     dx, 550
+	push    dx
+	mov 	dx, 180
+	push    dx
+	mov 	dx, 100
+	push    dx
+	mov 	dx, 440
+	push    dx
+	call 	line
 	jmp 	termina_verifica_vencedores
 verifica_vencedor_do_11_vertical:
 	cmp 	byte [campo_status], al
@@ -184,6 +224,16 @@ verifica_vencedor_do_21_horizontal:
 	cmp 	byte [campo_status+5], al
 	jne 	verifica_vencedor_do_31_horizontal
 	mov 	byte [jogador_vencedor], al
+	mov     byte [cor], azul_claro
+	mov 	dx, 100
+	push    dx
+	mov 	dx, 310
+	push    dx
+	mov     dx, 550
+	push    dx
+	mov 	dx, 310
+	push    dx
+	call 	line
 	jmp 	termina_verifica_vencedores
 verifica_vencedor_do_31_horizontal:
 	cmp 	byte [campo_status+6], al
@@ -193,6 +243,16 @@ verifica_vencedor_do_31_horizontal:
 	cmp 	byte [campo_status+8], al
 	jne 	verifica_vencedor_do_31_diagonal
 	mov 	byte [jogador_vencedor], al
+	mov     byte [cor], azul_claro
+	mov 	dx, 100
+	push    dx
+	mov 	dx, 220
+	push    dx
+	mov     dx, 550
+	push    dx
+	mov 	dx, 220
+	push    dx
+	call 	line
 	jmp 	termina_verifica_vencedores
 verifica_vencedor_do_31_diagonal:
 	cmp 	byte [campo_status+6], al
@@ -202,6 +262,16 @@ verifica_vencedor_do_31_diagonal:
 	cmp 	byte [campo_status+2], al
 	jne     verifica_jogador_2
 	mov 	byte [jogador_vencedor], al
+	mov     byte [cor], azul_claro
+	mov 	dx, 100
+	push    dx
+	mov 	dx, 180
+	push    dx
+	mov     dx, 550
+	push    dx
+	mov 	dx, 440
+	push    dx
+	call 	line
 	jmp 	termina_verifica_vencedores
 verifica_jogador_2:
 	cmp     al, 2
