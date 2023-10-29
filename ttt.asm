@@ -16,15 +16,19 @@ segment code:
    	mov     	ah,0
     int     	10h
 
-; loop principal do jogo
+; loop principal do jogo -----------------
 loop_principal:
 	call 		verifica_vencedores
+	call        limpar_tela
     call        imprime_tela
+	mov  byte	[jogada_invalida], 0
 	call		entrar_jogada
 	call 		ler_jogada
+	cmp  byte   [jogada_invalida], 0
+	jne      	loop_principal
 	call 		alterar_jogador
-	call        limpar_tela
 	jmp			loop_principal
+; fim do loop principal ------------------
 
 ; inicia a sequencia de fechamento do jogo
 sair:
@@ -41,24 +45,35 @@ ler_jogada:
     push    cx
     push    di
 
-	cmp		byte [buffer], 's'
-	je 		sair
-	cmp		byte [buffer], 'r'
-	jne     fazer_jogada
+	cmp	 byte	[buffer], 's'
+	je 			sair
+	cmp	 byte	[buffer], 'r'
+	jne    		ler_jogador
 	; limpa as posições do jogo da velha (opcao de reset)
 	mov cx, 9
 limpa_status_campos:
-	mov di, cx
-	sub di, 1
-	mov byte[campo_status+di], 0
-	loop limpa_status_campos
+	mov 		di, cx
+	sub 		di, 1
+	mov  byte	[campo_status+di], 0
+	loop 		limpa_status_campos
 	mov  byte	[jogador_vencedor], 0
 	mov  byte	[jogador_atual], 1
-	pop 	di
-	pop 	cx
-	pop 	bx
-	pop 	ax
-	ret
+	jmp 		fim_ler_jogada
+ler_jogador:
+	cmp  byte	[jogador_atual], 1
+	je 			ler_jogada_x
+	cmp  byte 	[jogador_atual], 2
+	je 			ler_jogada_o
+ler_jogada_x:
+	cmp  byte	[buffer], 'x'
+	je 			fazer_jogada
+	mov  byte 	[jogada_invalida], 1
+	jmp 		fim_ler_jogada
+ler_jogada_o:
+	cmp  byte	[buffer], 'c'
+	je 			fazer_jogada
+	mov  byte 	[jogada_invalida], 1
+	jmp 		fim_ler_jogada
 fazer_jogada:	
 	mov     al, [buffer+1]
 	sub		al, '0'
@@ -73,12 +88,12 @@ fazer_jogada:
 	movzx   bx, bl
 	add		di, bx
 	cmp     byte [buffer], 'x'
-	je      ler_jogada_x
+	je      fazer_jogada_x
 	mov		byte [campo_status+di], 2
 	mov     cx, 3
 	mov     di, 0
 	jmp     limpa_buffer
-ler_jogada_x:
+fazer_jogada_x:
 	mov     byte [campo_status+di], 1
 	; clean buffer
 	mov     cx, 3
@@ -86,7 +101,7 @@ ler_jogada_x:
 limpa_buffer:
 	mov byte[buffer+di], ' '
 	loop limpa_buffer
-
+fim_ler_jogada:
 	pop 	di
 	pop 	cx
 	pop 	bx
@@ -944,7 +959,7 @@ imprimevencedor2:
 	jmp 		fim_imprime_tela
 verifica_empate_imprime:
 	cmp  byte 	[jogador_vencedor], 3
-	jne 		fim_imprime_tela
+	jne 		imprime_erros
 	mov  byte	[cor], amarelo
 	mov     	cx,6			;n�mero de caracteres
 	mov     	bx,0
@@ -957,7 +972,48 @@ imprimeempate:
 	inc     	bx			;proximo caracter
 	inc			dl			;avanca a coluna
 	loop    	imprimeempate
-
+	jmp 		fim_imprime_tela
+; verificar se há problema com jogada invalida
+imprime_erros:
+	cmp  byte   [jogada_invalida], 0
+	jne 		imprime_erros_2
+	jmp 		imprime_jogador_da_vez
+imprime_erros_2:
+	cmp  byte   [jogada_invalida], 1
+	je 			imprime_jogador_incorreto
+	jmp 		fim_imprime_tela
+imprime_jogador_incorreto:
+	mov  byte	[cor], vermelho
+	mov     	cx,17			;n�mero de caracteres
+	mov     	bx,0
+	mov     	dh,27			;linha 0-29
+	mov     	dl,30			;coluna 0-79
+imprime_jogador_incorreto_loop:
+	call		cursor
+	mov     	al,[bx+texto_jogador_incorreto]
+	call		caracter
+	inc     	bx			;proximo caracter
+	inc			dl			;avanca a coluna
+	loop    	imprime_jogador_incorreto_loop
+	jmp			fim_imprime_tela
+imprime_jogador_da_vez:
+	mov  byte	[cor], magenta
+	mov     	cx,16			;n�mero de caracteres
+	mov     	ax, [jogador_atual]
+	sub    		ax, 1
+	mov			bx, 16
+	mul 		bx
+	mov     	bx,ax
+	mov     	dh,27			;linha 0-29
+	mov     	dl,30			;coluna 0-79
+imprime_jogador_da_vez_loop:
+	call		cursor
+	mov     	al,[bx+texto_vez_de_jogador_1]
+	call		caracter
+	inc     	bx			;proximo caracter
+	inc			dl			;avanca a coluna
+	loop    	imprime_jogador_da_vez_loop
+	jmp			fim_imprime_tela
 fim_imprime_tela
 	pop		dx
 	pop		cx
@@ -1244,10 +1300,10 @@ deltax		dw		0
 deltay		dw		0	
 texto_campo_comando    	db  		'Campo de comando'
 texto_campo_mensagem    	db  		'Campo de mensagens'
-texto_vez_de_jogador_1    	db  		'Vez de jogador 1'
-texto_vez_de_jogador_2    	db  		'Vez de jogador 2'
+texto_vez_de_jogador_1    	db  		'Vez de jogador 1', 'Vez de jogador 2'
 texto_jogador_1_venceu		db  		'Jogador 1 venceu'
 texto_jogador_2_venceu		db  		'Jogador 2 venceu'
+texto_jogador_incorreto     db			'Jogador incorreto'
 texto_empate					db  		'Empate'
 campo_11    	db  		'11'
 campo_12    	db  		'12'
@@ -1267,12 +1323,17 @@ kb_enter	 			equ		13
 ; inicializa matriz 3x3 com 0
 campo_status TIMES 9 db 0
 ; qual jogador está jogando
+;1 : X. 
+;2 : O
 jogador_atual 		db 1
 ; 0: ninguém ganhou, jogo rolando
 ; 1: jogador 1 ganhou
 ; 2: jogador 2 ganhou
 ; 3: empate
 jogador_vencedor 	db 0
+; 1: invalido - jogador incorreto
+; 0: valido
+jogada_invalida 	db 0
 ;*************************************************************************
 segment stack stack
     		resb 		512
