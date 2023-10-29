@@ -219,25 +219,25 @@ ler_buffer1:
 	cmp		al, 'c'
 	je 		continue_buffer1
 	cmp		al, 's'
-	je 		sair_or_reset
+	je 		sair_ou_reset
 	cmp		al, 'r'
-	je 		sair_or_reset
+	je 		sair_ou_reset
 	jmp 	ler_buffer1
-sair_or_reset:
+sair_ou_reset:
 	mov     byte[buffer], al
     call    caracter
-sair_or_reset_after_print:
+sair_ou_resetar_apos_imprime:
 	mov     ah, 7
     int     21h
 	cmp		al, kb_backspace
-	jne 	after_sair_or_reset_backspace
+	jne 	apos_sair_ou_resetar_backspace
 	mov		byte[buffer], ' '
 	call	cursor
 	call 	caracter
 	jmp 	ler_buffer1
-after_sair_or_reset_backspace:
+apos_sair_ou_resetar_backspace:
 	cmp		al, kb_enter
-	jne 	sair_or_reset_after_print
+	jne 	sair_ou_resetar_apos_imprime
 
 	pop     dx
     pop     cx
@@ -255,13 +255,13 @@ ler_buffer2:
 	mov     ah, 7
     int     21h
 	cmp		al, kb_backspace
-	jne 	after_buffer2_backspace
+	jne 	apos_buffer2_backspace
 	sub 	dl, 1
 	mov		byte[buffer], ' '
 	call	cursor
 	call 	caracter
 	jmp 	ler_buffer1
-after_buffer2_backspace:
+apos_buffer2_backspace:
 	sub     al, '0'          ; convert from ASCII to binary
     cmp     al, 1
     jb      ler_buffer2
@@ -278,13 +278,13 @@ ler_buffer3:
     mov     ah, 7
     int     21h
 	cmp		al, kb_backspace
-	jne 	after_buffer3_backspace
+	jne 	apos_buffer3_backspace
 	sub 	dl, 1
 	mov		byte[buffer+1], ' '
 	call	cursor
 	call 	caracter
 	jmp 	ler_buffer2
-after_buffer3_backspace:
+apos_buffer3_backspace:
 	sub     al, '0'          ; convert from ASCII to binary
     cmp     al, 1
     jb      ler_buffer3
@@ -297,12 +297,12 @@ buffer_end:
     mov     ah, 7
     int     21h
 	cmp		al, kb_backspace
-	jne 	after_buffer_end_backspace
+	jne 	apos_buffer_end_backspace
 	mov		byte[buffer+2], ' '
 	call	cursor
 	call 	caracter
 	jmp 	ler_buffer3
-after_buffer_end_backspace:
+apos_buffer_end_backspace:
 	cmp     al, kb_enter
 	jne     buffer_end
     
@@ -635,37 +635,37 @@ imprime_tela:
     mov     	bx,0
     mov     	dh,23			;linha 0-29
     mov     	dl,10			;coluna 0-79
-printcommand:
+imprimecommand:
     call	cursor
     mov     al,[bx+campo_comando]
     call	caracter
     inc     bx			;proximo caracter
     inc		dl			;avanca a coluna
-    loop    printcommand
+    loop    imprimecommand
 ;  message zone string
     mov     	cx,18			;n�mero de caracteres
     mov     	bx,0
     mov     	dh,27			;linha 0-29
     mov     	dl,10			;coluna 0-79
-printmsg:
+imprimemsg:
     call	cursor
     mov     al,[bx+campo_mensagem]
     call	caracter
     inc     bx			;proximo caracter
     inc		dl			;avanca a coluna
-    loop    printmsg
+    loop    imprimemsg
 ; zone 11 string
     mov     	cx,2			;n�mero de caracteres
     mov     	bx,0
     mov     	dh,2			;linha 0-29
     mov     	dl,8			;coluna 0-79
-print11:
+imprime11:
     call	cursor
     mov     al,[bx+campo_11]
     call	caracter
     inc     bx			;proximo caracter
     inc		dl			;avanca a coluna
-    loop    print11
+    loop    imprime11
 ; if campo_11_status === 1 draw a cross
     cmp byte [campo_status], 1
     mov     bx, 400
@@ -686,13 +686,13 @@ jump_11:
     mov     	bx,0
     mov     	dh,2			;linha 0-29
     mov     	dl,30			;coluna 0-79
-print12:
+imprime12:
     call	cursor
     mov     al,[bx+campo_12]
     call	caracter
     inc     bx			;proximo caracter
     inc		dl			;avanca a coluna
-    loop    print12
+    loop    imprime12
 ; if campo_12_status === 1 draw a cross, if === 2, draw a circle
     cmp byte [campo_status+1], 1
     mov     bx, 400
@@ -713,13 +713,13 @@ jump_12:
     mov     	bx,0
     mov     	dh,2			;linha 0-29
     mov     	dl,52			;coluna 0-79
-print13:
+imprime13:
     call	cursor
     mov     al,[bx+campo_13]
     call	caracter
     inc     bx			;proximo caracter
     inc		dl			;avanca a coluna
-    loop    print13
+    loop    imprime13
 ; if campo_13_status === 1 draw a cross, if === 2, draw a circle
     cmp byte [campo_status+2], 1
     mov     bx, 400
@@ -740,13 +740,13 @@ jump_13:
     mov     	bx,0
     mov     	dh,8			;linha 0-29
     mov     	dl,8			;coluna 0-79
-print21:
+imprime21:
     call	cursor
     mov     al,[bx+campo_21]
     call	caracter
     inc     bx			;proximo caracter
     inc		dl			;avanca a coluna
-    loop    print21
+    loop    imprime21
 ; if campo_21_status === 1 draw a cross, if === 2, draw a circle
     cmp byte [campo_status+3], 1
     mov     bx, 310
@@ -767,13 +767,13 @@ jump_21:
     mov     	bx,0
     mov     	dh,8			;linha 0-29
     mov     	dl,30			;coluna 0-79
-print22:
+imprime22:
     call	cursor
     mov     al,[bx+campo_22]
     call	caracter
     inc     bx			;proximo caracter
     inc		dl			;avanca a coluna
-    loop    print22
+    loop    imprime22
 ; if campo_22_status === 1 draw a cross, if === 2, draw a circle
     cmp byte [campo_status+4], 1
     mov     bx, 310
@@ -794,13 +794,13 @@ jump_22:
     mov     	bx,0
     mov     	dh,8			;linha 0-29
     mov     	dl,52			;coluna 0-79
-print23:
+imprime23:
     call	cursor
     mov     al,[bx+campo_23]
     call	caracter
     inc     bx			;proximo caracter
     inc		dl			;avanca a coluna
-    loop    print23
+    loop    imprime23
 ; if campo_23_status === 1 draw a cross, if === 2, draw a circle
     cmp byte [campo_status+5], 1
     mov     bx, 310
@@ -821,13 +821,13 @@ jump_23:
     mov     	bx,0
     mov     	dh,14			;linha 0-29
     mov     	dl,8			;coluna 0-79
-print31:
+imprime31:
     call	cursor
     mov     al,[bx+campo_31]
     call	caracter
     inc     bx			;proximo caracter
     inc		dl			;avanca a coluna
-    loop    print31
+    loop    imprime31
 ; if campo_31_status === 1 draw a cross, if === 2, draw a circle
     cmp byte [campo_status+6], 1
     mov     bx, 220
@@ -848,13 +848,13 @@ jump_31:
     mov     	bx,0
     mov     	dh,14			;linha 0-29
     mov     	dl,30			;coluna 0-79
-print32:
+imprime32:
     call	cursor
     mov     al,[bx+campo_32]
     call	caracter
     inc     bx			;proximo caracter
     inc		dl			;avanca a coluna
-    loop    print32
+    loop    imprime32
 ; if campo_32_status === 1 draw a cross, if === 2, draw a circle
     cmp byte [campo_status+7], 1
     mov     bx, 220
@@ -875,13 +875,13 @@ jump_32:
     mov     	bx,0
     mov     	dh,14			;linha 0-29
     mov     	dl,52			;coluna 0-79
-print33:
+imprime33:
     call	cursor
     mov     al,[bx+campo_33]
     call	caracter
     inc     bx			;proximo caracter
     inc		dl			;avanca a coluna
-    loop    print33
+    loop    imprime33
 ; if campo_33_status === 1 draw a cross, if === 2, draw a circle
     cmp byte [campo_status+8], 1
     mov     bx, 220
