@@ -52,7 +52,8 @@ limpa_status_campos:
 	sub di, 1
 	mov byte[campo_status+di], 0
 	loop limpa_status_campos
-
+	mov  byte	[jogador_vencedor], 0
+	mov  byte	[jogador_atual], 1
 	pop 	di
 	pop 	cx
 	pop 	bx
@@ -104,85 +105,90 @@ alterar_jogador_o:
 
 ; funcao que verifica se algum dos jogadores venceu
 verifica_vencedores:
-	push 	ax
-	push 	bx
-	push 	cx
+	push    ax
+    push    cx
 	push 	dx
-	push 	di
+    push    di
 
-	;verifica se o jogador 1 venceu
-	;verificar se o jogador 1 possui campo 11, se sim, checar 12 e 13, ou 21 e 31, ou 22 e 33
-	cmp		byte [campo_status], 1
+	mov 	al, 1
+	;verifica se o jogador al venceu
+verifica_vencedor_do_11_horizontal:
+	cmp		byte [campo_status], al
 	jne 	verifica_vencedor_do_12_vertical
-	cmp		byte [campo_status+1], 1
+	cmp		byte [campo_status+1], al
 	jne 	verifica_vencedor_do_13_vertical
-	mov		byte [campo_status+2], 1
+	cmp		byte [campo_status+2], al
 	jne 	verifica_vencedor_do_11_diagonal
-	mov     byte [jogador_vencedor], 1
-	call 	termina_verifica_vencedores
+	mov     byte [jogador_vencedor], al
+	jmp 	termina_verifica_vencedores
 verifica_vencedor_do_12_vertical:
-	cmp 	byte [campo_status+1], 1
+	cmp 	byte [campo_status+1], al
 	jne 	verifica_vencedor_do_13_vertical
-	cmp 	byte [campo_status+4], 1
+	cmp 	byte [campo_status+4], al
 	jne 	verifica_vencedor_do_13_vertical
-	mov		byte [campo_status+7], 1
+	cmp		byte [campo_status+7], al
 	jne 	verifica_vencedor_do_13_vertical
-	mov     byte [jogador_vencedor], 1
-	call 	termina_verifica_vencedores
+	mov     byte [jogador_vencedor], al
+	jmp 	termina_verifica_vencedores
 verifica_vencedor_do_13_vertical:
-	cmp 	byte [campo_status+2], 1
+	cmp 	byte [campo_status+2], al
 	jne 	verifica_vencedor_do_11_diagonal
-	mov		byte [campo_status+5], 1
+	cmp		byte [campo_status+5], al
 	jne 	verifica_vencedor_do_11_diagonal
-	mov		byte [campo_status+8], 1
+	cmp		byte [campo_status+8], al
 	jne 	verifica_vencedor_do_11_diagonal
-	mov     byte [jogador_vencedor], 1
-	call 	termina_verifica_vencedores
+	mov     byte [jogador_vencedor], al
+	jmp 	termina_verifica_vencedores
 verifica_vencedor_do_11_diagonal:
-	cmp 	byte [campo_status], 1
+	cmp 	byte [campo_status], al
 	jne 	verifica_vencedor_do_11_vertical
-	cmp 	byte [campo_status+4], 1
+	cmp 	byte [campo_status+4], al
 	jne 	verifica_vencedor_do_11_vertical
-	cmp 	byte [campo_status+8], 1
+	cmp 	byte [campo_status+8], al
 	jne 	verifica_vencedor_do_11_vertical
-	mov     byte [jogador_vencedor], 1
-	call 	termina_verifica_vencedores
+	mov     byte [jogador_vencedor], al
+	jmp 	termina_verifica_vencedores
 verifica_vencedor_do_11_vertical:
-	cmp 	byte [campo_status], 1
+	cmp 	byte [campo_status], al
 	jne 	verifica_vencedor_do_21_horizontal
-	cmp 	byte [campo_status+3], 1
+	cmp 	byte [campo_status+3], al
 	jne 	verifica_vencedor_do_21_horizontal
-	cmp 	byte [campo_status+6], 1
+	cmp 	byte [campo_status+6], al
 	jne 	verifica_vencedor_do_21_horizontal
-	mov 	byte [jogador_vencedor], 1
-	call 	termina_verifica_vencedores
+	mov 	byte [jogador_vencedor], al
+	jmp 	termina_verifica_vencedores
 verifica_vencedor_do_21_horizontal:
-	cmp 	byte [campo_status+3], 1
+	cmp 	byte [campo_status+3], al
 	jne 	verifica_vencedor_do_31_horizontal
-	cmp 	byte [campo_status+4], 1
+	cmp 	byte [campo_status+4], al
 	jne 	verifica_vencedor_do_31_horizontal
-	mov 	byte [campo_status+5], 1
+	cmp 	byte [campo_status+5], al
 	jne 	verifica_vencedor_do_31_horizontal
-	mov 	byte [jogador_vencedor], 1
-	call 	termina_verifica_vencedores
+	mov 	byte [jogador_vencedor], al
+	jmp 	termina_verifica_vencedores
 verifica_vencedor_do_31_horizontal:
-	cmp 	byte [campo_status+6], 1
+	cmp 	byte [campo_status+6], al
 	jne 	verifica_vencedor_do_31_diagonal
-	cmp 	byte [campo_status+7], 1
+	cmp 	byte [campo_status+7], al
 	jne 	verifica_vencedor_do_31_diagonal
-	mov 	byte [campo_status+8], 1
+	cmp 	byte [campo_status+8], al
 	jne 	verifica_vencedor_do_31_diagonal
-	mov 	byte [jogador_vencedor], 1
-	call 	termina_verifica_vencedores
+	mov 	byte [jogador_vencedor], al
+	jmp 	termina_verifica_vencedores
 verifica_vencedor_do_31_diagonal:
-	cmp 	byte [campo_status+6], 1
-	jne     verifica_empate
-	cmp 	byte [campo_status+4], 1
-	jne     verifica_empate
-	cmp 	byte [campo_status+2], 1
-	jne     verifica_empate
-	mov 	byte [jogador_vencedor], 1
-	call 	termina_verifica_vencedores
+	cmp 	byte [campo_status+6], al
+	jne     verifica_jogador_2
+	cmp 	byte [campo_status+4], al
+	jne     verifica_jogador_2
+	cmp 	byte [campo_status+2], al
+	jne     verifica_jogador_2
+	mov 	byte [jogador_vencedor], al
+	jmp 	termina_verifica_vencedores
+verifica_jogador_2:
+	cmp     al, 2
+	je      verifica_empate
+	mov     al, 2
+	jmp     verifica_vencedor_do_11_horizontal
 verifica_empate:
 	mov cx, 9
 verifica_empate_loop:
@@ -193,12 +199,12 @@ verifica_empate_loop:
 	loop verifica_empate_loop
 	mov byte [jogador_vencedor], 3
 termina_verifica_vencedores:
-	pop		di
-	pop		dx
-	pop		cx
-	pop		bx
-	pop		ax
+	pop 	di
+	pop 	dx
+	pop 	cx
+	pop 	ax
 	ret
+; final da verifica jogadores
 
 ; le os comandos do jogador e armazena no buffer
 entrar_jogada:
@@ -1266,7 +1272,7 @@ jogador_atual 		db 1
 ; 1: jogador 1 ganhou
 ; 2: jogador 2 ganhou
 ; 3: empate
-jogador_vencedor 	db 1
+jogador_vencedor 	db 0
 ;*************************************************************************
 segment stack stack
     		resb 		512
