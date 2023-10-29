@@ -48,7 +48,7 @@ ler_jogada:
 	cmp	 byte	[buffer], 's'
 	je 			sair
 	cmp	 byte	[buffer], 'r'
-	jne    		ler_jogador
+	jne    		retorna_se_finalizado
 	; limpa as posições do jogo da velha (opcao de reset)
 	mov cx, 9
 limpa_status_campos:
@@ -59,6 +59,10 @@ limpa_status_campos:
 	mov  byte	[jogador_vencedor], 0
 	mov  byte	[jogador_atual], 1
 	jmp 		fim_ler_jogada
+retorna_se_finalizado:
+	cmp  byte   [jogador_vencedor], 0
+	je   		ler_jogador
+	jmp			fim_ler_jogada
 ler_jogador:
 	cmp  byte	[jogador_atual], 1
 	je 			ler_jogada_x
@@ -1331,8 +1335,8 @@ jogador_atual 		db 1
 ; 2: jogador 2 ganhou
 ; 3: empate
 jogador_vencedor 	db 0
-; 1: invalido - jogador incorreto
 ; 0: valido
+; 1: invalido - jogador incorreto
 jogada_invalida 	db 0
 ;*************************************************************************
 segment stack stack
