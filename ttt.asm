@@ -18,6 +18,7 @@ segment code:
 
 ; loop principal do jogo
 loop_principal:
+	call 		verifica_vencedores
     call        imprime_tela
 	call		entrar_jogada
 	call 		ler_jogada
@@ -209,7 +210,7 @@ entrar_jogada:
     ; ler o primeiro caractere
 ler_buffer1:
 	mov byte[cor], azul_claro
-    mov     dh, 27
+    mov     dh, 23
     mov     dl, 30
 	call cursor
     mov     ah, 7
@@ -514,7 +515,13 @@ limpar_tela:
     int     	10h
     ret
 
+; imprime o grid do jogo da velha, com os campos e as mensagens
 imprime_tela:
+	push 		ax
+	push 		bx
+	push 		cx
+	push 		dx
+
 ; left tik tak toe bar
     mov		byte[cor],branco_intenso
 	mov		ax,232
@@ -637,7 +644,7 @@ imprime_tela:
     mov     	dl,10			;coluna 0-79
 imprimecommand:
     call	cursor
-    mov     al,[bx+campo_comando]
+    mov     al,[bx+texto_campo_comando]
     call	caracter
     inc     bx			;proximo caracter
     inc		dl			;avanca a coluna
@@ -649,7 +656,7 @@ imprimecommand:
     mov     	dl,10			;coluna 0-79
 imprimemsg:
     call	cursor
-    mov     al,[bx+campo_mensagem]
+    mov     al,[bx+texto_campo_mensagem]
     call	caracter
     inc     bx			;proximo caracter
     inc		dl			;avanca a coluna
@@ -670,11 +677,11 @@ imprime11:
     cmp byte [campo_status], 1
     mov     bx, 400
     mov     ax, 150
-    jne check_11
+    jne checa_11
     push    ax
     push    bx
     call draw_cross
-check_11:
+checa_11:
 		cmp byte [campo_status], 2
 		jne jump_11
 		push 		ax
@@ -697,11 +704,11 @@ imprime12:
     cmp byte [campo_status+1], 1
     mov     bx, 400
     mov     ax, 320
-    jne check_12
+    jne checa_12
     push    ax
     push    bx
     call draw_cross
-check_12:
+checa_12:
 		cmp byte [campo_status+1], 2
 		jne jump_12
 		push 		ax
@@ -724,11 +731,11 @@ imprime13:
     cmp byte [campo_status+2], 1
     mov     bx, 400
     mov     ax, 500
-    jne check_13
+    jne checa_13
     push    ax
     push    bx
     call draw_cross
-check_13:
+checa_13:
 		cmp byte [campo_status+2], 2
 		jne jump_13
 		push 		ax
@@ -751,11 +758,11 @@ imprime21:
     cmp byte [campo_status+3], 1
     mov     bx, 310
     mov     ax, 150
-    jne check_21
+    jne checa_21
     push    ax
     push    bx
     call draw_cross
-check_21:
+checa_21:
 		cmp byte [campo_status+3], 2
 		jne jump_21
 		push 		ax
@@ -778,11 +785,11 @@ imprime22:
     cmp byte [campo_status+4], 1
     mov     bx, 310
     mov     ax, 320
-    jne check_22
+    jne checa_22
     push    ax
     push    bx
     call draw_cross
-check_22:
+checa_22:
 		cmp byte [campo_status+4], 2
 		jne jump_22
 		push 		ax
@@ -805,11 +812,11 @@ imprime23:
     cmp byte [campo_status+5], 1
     mov     bx, 310
     mov     ax, 500
-    jne check_23
+    jne checa_23
     push    ax
     push    bx
     call draw_cross
-check_23:
+checa_23:
 		cmp byte [campo_status+5], 2
 		jne jump_23
 		push 		ax
@@ -832,11 +839,11 @@ imprime31:
     cmp byte [campo_status+6], 1
     mov     bx, 220
     mov     ax, 150
-    jne check_31
+    jne checa_31
     push    ax
     push    bx
     call draw_cross
-check_31:
+checa_31:
 		cmp byte [campo_status+6], 2
 		jne jump_31
 		push 		ax
@@ -859,11 +866,11 @@ imprime32:
     cmp byte [campo_status+7], 1
     mov     bx, 220
     mov     ax, 320
-    jne check_32
+    jne checa_32
     push    ax
     push    bx
     call draw_cross
-check_32:
+checa_32:
 		cmp byte [campo_status+7], 2
 		jne jump_32
 		push 		ax
@@ -886,19 +893,74 @@ imprime33:
     cmp byte [campo_status+8], 1
     mov     bx, 220
     mov     ax, 500
-    jne check_33
+    jne checa_33
     push    ax
     push    bx
     call draw_cross
-check_33:
-		cmp byte [campo_status+8], 2
-		jne jump_33
-		push 		ax
-		push 		bx
-		call draw_circle
+checa_33:
+	cmp byte 	[campo_status+8], 2
+	jne 		jump_33
+	push 		ax
+	push 		bx
+	call 		draw_circle
 jump_33:
+;  veficar se algum jogador venceu e imprimir em tela
+	cmp  byte 	[jogador_vencedor], 1
+	jne 		verifica_vencedor_2
+	mov  byte	[cor], verde_claro
+	mov     	cx,16			;n�mero de caracteres
+	mov     	bx,0
+	mov     	dh,27			;linha 0-29
+	mov     	dl,30			;coluna 0-79
+imprimevencedor:
+	call		cursor
+	mov     	al,[bx+texto_jogador_1_venceu]
+	call		caracter
+	inc     	bx			;proximo caracter
+	inc			dl			;avanca a coluna
+	loop    	imprimevencedor
+	jmp 		fim_imprime_tela
+verifica_vencedor_2:
+	cmp  byte 	[jogador_vencedor], 2
+	jne			verifica_empate_imprime
+	mov  byte	[cor], verde_claro
+	mov     	cx,16			;n�mero de caracteres
+	mov     	bx,0
+	mov     	dh,27			;linha 0-29
+	mov     	dl,30			;coluna 0-79
+imprimevencedor2:
+	call		cursor
+	mov     	al,[bx+texto_jogador_2_venceu]
+	call		caracter
+	inc     	bx			;proximo caracter
+	inc			dl			;avanca a coluna
+	loop    	imprimevencedor2
+	jmp 		fim_imprime_tela
+verifica_empate_imprime:
+	cmp  byte 	[jogador_vencedor], 3
+	jne 		fim_imprime_tela
+	mov  byte	[cor], amarelo
+	mov     	cx,6			;n�mero de caracteres
+	mov     	bx,0
+	mov     	dh,27			;linha 0-29
+	mov     	dl,30			;coluna 0-79
+imprimeempate:
+	call		cursor
+	mov     	al,[bx+texto_empate]
+	call		caracter
+	inc     	bx			;proximo caracter
+	inc			dl			;avanca a coluna
+	loop    	imprimeempate
 
-    ret     0
+fim_imprime_tela
+	pop		dx
+	pop		cx
+	pop		bx
+	pop		ax
+    ret
+; final da funcao imprime_tela
+
+
 ; **********************************************************
 
 
@@ -1174,8 +1236,13 @@ linha   	dw  		0
 coluna  	dw  		0
 deltax		dw		0
 deltay		dw		0	
-campo_comando    	db  		'Campo de comando'
-campo_mensagem    	db  		'Campo de mensagens'
+texto_campo_comando    	db  		'Campo de comando'
+texto_campo_mensagem    	db  		'Campo de mensagens'
+texto_vez_de_jogador_1    	db  		'Vez de jogador 1'
+texto_vez_de_jogador_2    	db  		'Vez de jogador 2'
+texto_jogador_1_venceu		db  		'Jogador 1 venceu'
+texto_jogador_2_venceu		db  		'Jogador 2 venceu'
+texto_empate					db  		'Empate'
 campo_11    	db  		'11'
 campo_12    	db  		'12'
 campo_13    	db  		'13'
@@ -1199,7 +1266,7 @@ jogador_atual 		db 1
 ; 1: jogador 1 ganhou
 ; 2: jogador 2 ganhou
 ; 3: empate
-jogador_vencedor 	db 0
+jogador_vencedor 	db 1
 ;*************************************************************************
 segment stack stack
     		resb 		512
