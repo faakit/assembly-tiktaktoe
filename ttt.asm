@@ -79,18 +79,23 @@ ler_jogada_o:
 	mov  byte 	[jogada_invalida], 1
 	jmp 		fim_ler_jogada
 fazer_jogada:	
-	mov     al, [buffer+1]
-	sub		al, '0'
-	sub 	al, 1
-	mov		bx, 3
-	mul		bx
-	movzx   ax, al
-	mov     di, ax
-	mov	    bl, [buffer+2]
-	sub		bl, '0'
-	sub 	bl, 1
-	movzx   bx, bl
-	add		di, bx
+	mov     	al, [buffer+1]
+	sub			al, '0'
+	sub 		al, 1
+	mov			bx, 3
+	mul			bx
+	movzx   	ax, al
+	mov     	di, ax
+	mov	    	bl, [buffer+2]
+	sub			bl, '0'
+	sub 		bl, 1
+	movzx   	bx, bl
+	add			di, bx
+	cmp	 byte	[campo_status+di], 0
+	je			campo_limpo
+	mov  byte 	[jogada_invalida], 2
+	jmp 		fim_ler_jogada
+campo_limpo:
 	cmp     byte [buffer], 'x'
 	je      fazer_jogada_x
 	mov		byte [campo_status+di], 2
@@ -1055,7 +1060,23 @@ imprime_erros:
 imprime_erros_2:
 	cmp  byte   [jogada_invalida], 1
 	je 			imprime_jogador_incorreto
+	cmp  byte 	[jogada_invalida], 2
+	je 			imprime_campo_preenchido
 	jmp 		fim_imprime_tela
+imprime_campo_preenchido:
+	mov  byte	[cor], vermelho
+	mov     	cx,19			;n�mero de caracteres
+	mov     	bx,0
+	mov     	dh,27			;linha 0-29
+	mov     	dl,30			;coluna 0-79
+imprime_campo_preenchido_loop:
+	call		cursor
+	mov     	al,[bx+texto_campo_preenchido]
+	call		caracter
+	inc     	bx			;proximo caracter
+	inc			dl			;avanca a coluna
+	loop    	imprime_campo_preenchido_loop
+	jmp			fim_imprime_tela
 imprime_jogador_incorreto:
 	mov  byte	[cor], vermelho
 	mov     	cx,17			;n�mero de caracteres
@@ -1378,6 +1399,7 @@ texto_vez_de_jogador_1    	db  		'Vez de jogador 1', 'Vez de jogador 2'
 texto_jogador_1_venceu		db  		'Jogador 1 venceu'
 texto_jogador_2_venceu		db  		'Jogador 2 venceu'
 texto_jogador_incorreto     db			'Jogador incorreto'
+texto_campo_preenchido		db  		'Campo ja preenchido'
 texto_empate					db  		'Empate'
 campo_11    	db  		'11'
 campo_12    	db  		'12'
@@ -1407,6 +1429,7 @@ jogador_atual 		db 1
 jogador_vencedor 	db 0
 ; 0: valido
 ; 1: invalido - jogador incorreto
+; 2: invalido - campo já preenchido
 jogada_invalida 	db 0
 ;*************************************************************************
 segment stack stack
